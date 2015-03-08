@@ -15,6 +15,8 @@
 gpu2dCanvas::gpu2dCanvas( ) {
 	gpu2dCanvas( true );
 }
+//Protección contra interrupciones
+
 
 // BASIC CONSTRUCTOR
 gpu2dCanvas::gpu2dCanvas( bool useDoubleBuffer ) {
@@ -58,6 +60,8 @@ gpu2dCanvas::gpu2dCanvas( bool useDoubleBuffer ) {
 }
 
 bool gpu2dCanvas::initFrameBuffer( void ) {
+
+
 	// Crete the request data.
 	uint32 requestData = RaspberryLib::Memory::PHYSICAL_TO_BUS( (uint32)fbInfo );
 	// Send the request.
@@ -78,10 +82,13 @@ bool gpu2dCanvas::initFrameBuffer( void ) {
 	
 	// Set our valid flag and return
 	this->valid = true;
+
+
 	return true;
 }
 
 void gpu2dCanvas::Draw( void ) {
+
 	if ( !this->valid ) return;
 	if (  !this->enableDoubleBuffer ) return;
 	
@@ -94,9 +101,11 @@ void gpu2dCanvas::Draw( void ) {
 	
 	// Toggle switched.
 	this->switched = !this->switched;
+
 }
 
 void gpu2dCanvas::Clear( uint32 color ) {
+
 	if ( !this->valid ) return;
 	// Setup the variables.
 	uint32 x = 0, y = 0, y_offset = 0, bufferOffset;
@@ -104,9 +113,9 @@ void gpu2dCanvas::Clear( uint32 color ) {
 		y_offset = this->fbInfo->screen_height;
 	
 	// Calculate the colors.
-	char r = ( color & 0xFF0000 ) >> 16;
+	char b = ( color & 0xFF0000 ) >> 16;
 	char g = ( color & 0x00FF00 ) >> 8;
-	char b = ( color & 0x0000FF );
+	char r = ( color & 0x0000FF );
 	
 	// Iterate
 	for ( y = 0; y < this->fbInfo->screen_height; y++ ) {
@@ -122,10 +131,19 @@ void gpu2dCanvas::Clear( uint32 color ) {
 			
 		}
 	}
+
+}
+
+//NOT FAST
+void gpu2dCanvas::ClearFast(){
+	if ( !this->valid ) return;
 	
+	armClearScreen(&(this->fbInfo->screen_width),CBLACK);
+
 }
 
 void gpu2dCanvas::sync( void ) {
+
 	// If we're not in double buffer mode, don't even bother.
 	if ( !this->enableDoubleBuffer ) return;
 
@@ -152,9 +170,11 @@ void gpu2dCanvas::sync( void ) {
 			}
 		}	
 	}
+
 }
 
 void gpu2dCanvas::setPixel( uint32 x, uint32 y, uint32 color ) {
+
 	// Calculate which buffer to use.
 	uint32 y_offset = 0, bufferOffset = 0;
 	if ( !this->switched  && this->enableDoubleBuffer ) {
@@ -172,6 +192,8 @@ void gpu2dCanvas::setPixel( uint32 x, uint32 y, uint32 color ) {
 	*(char*)( this->fbInfo->framePtr + bufferOffset + 0 ) = r;
 	*(char*)( this->fbInfo->framePtr + bufferOffset + 1 ) = g;
 	*(char*)( this->fbInfo->framePtr + bufferOffset + 2 ) = b;
+
+
 }
 
 void gpu2dCanvas::DrawLine( int x1, int y1, int x2, int y2, uint32 color ) {
@@ -225,6 +247,8 @@ void gpu2dCanvas::DrawCharacter( int x, int y, char c, uint32 color ) {
 			// If show, then show.
 			if ( show ) {
 				setPixel ( x + num2, y + num1, color );
+			}else{
+				setPixel ( x + num2, y + num1, CBLACK );
 			}
 			
 		}
@@ -239,3 +263,5 @@ void gpu2dCanvas::ClearCharacter( int x, int y ) {
 		}
 	}
 }
+
+

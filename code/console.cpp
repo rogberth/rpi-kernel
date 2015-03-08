@@ -1,5 +1,8 @@
 #include "console.h"
 
+
+using namespace RaspberryLib;
+
 void Console::newLine( void ) {
 	this->chary++;
 	this->charx = 0;
@@ -11,7 +14,7 @@ void Console::newLine( void ) {
 }
 
 void Console::printChar( char c, uint32 color ) {
-	
+
 	// Look at all the important characters.
 	switch ( c ) {
 		case '\n':
@@ -57,6 +60,10 @@ void Console::printChar( char c, uint32 color ) {
 	
 	// Increment.
 	this->charx++;
+
+
+
+
 }
 
 // Standard printf function.
@@ -66,10 +73,35 @@ void Console::kprint( const char* string ) {
 
 // Clearscreen function.
 void Console::clear( void ) {
+/*
+	//Cambiar a modo SV si está en modo SYSTEM
+	asm volatile("push {r8,r9}");
+	asm volatile("MRS r8,CPSR");
+	asm volatile("LDR r9,=globalProtectCPSR");
+	asm volatile("STR r8,[r9] ");
+	asm volatile( "ORR r8,r8,#0xC");
+	asm volatile( "MSR CPSR,r8");
+	asm volatile("pop {r8,r9}");
+*/
+
+
+
 	this->charx = 0;
 	this->chary = 1;
-	this->canvas->Clear( 0x000000 );
+	//this->canvas->Clear( 0x050505 );
+	this->canvas->ClearFast();
 	this->canvas->Draw();
+
+
+/*
+	asm volatile("push {r8,r9}");
+	asm volatile("LDR r9,=globalProtectCPSR");
+	asm volatile("LDR r8,[r9]");
+	asm volatile("MSR CPSR,r8");
+	asm volatile("pop {r8,r9}");
+	this->kprintHexa32(globalProtectCPSR,CFUCHSIA);
+	*/
+
 }
 
 void Console::kprint( char* string ) {
@@ -79,7 +111,64 @@ void Console::kprint( char* string ) {
 		this->printChar( *(string++), 0xFFFFFF );
 	}
 }
+void Console::kprint(char* string, uint32 colour ) {
+	// Iterate over the string.
+	while ( *string != '\0' ) {
+		// Print the character.
+		this->printChar( *(string++), colour );
+	}
 
+}
+void Console::kprint(const char* string, uint32 colour ) {
+	this->kprint((char*) string,colour);
+}
+void Console::kprint(uint32 number){
+	this->kprint(number,CWHITE);
+}
+
+/*
+ * Divide entre 10 y se llama recursivamente, guardando el resto como variable
+ * local de cada llamada que imprimirá primero la última llamada pues será la cifra
+ * más significativa
+*/
+void Console::kprint(uint32 number, uint32 colour ) {
+	int result = 0,remainder = 0, bottom = 10;
+	divide( number, bottom, &result, &remainder );
+	//Caso base
+	if(result!=0){
+		this->kprint(result,colour);
+	}
+	this->printChar( remainder+'0', colour );
+}
+
+void Console::kprintHexa32(uint32 number){
+	this->kprintHexa32(number,CWHITE);
+}
+
+void Console::kprintHexa32(uint32 number, uint32 colour ) {
+	//8 caracteres
+	uint32 auxnum,extra;
+	for(int i=7;i>=0;i--){
+		/*
+		 * Desplaza los 4 bits del carácter a imprimir hasta las
+		 * posiciones de los 4 bits menos significativos. Finalmente se
+		 * pone el resto de bits a 0 usando una operación AND.
+		 */
+		auxnum = (number >> (4*i))& 0xF;
+		/*
+		 * En caso de que la cifra a imprimir sea mayor a 9,
+		 * hay que tener en cuenta la posición de los caracteres
+		 * alfabéticos en la tabla ASCII.
+		 */
+		if(auxnum > 9){
+			extra = 7;
+		}else{
+			extra = 0;
+		}
+		this->printChar( auxnum+'0'+extra, colour );
+	}
+}
+/*
 void Console::kbase( long prim, long base, long size ) {
 
 	// Validate the base.
@@ -121,7 +210,7 @@ void Console::kbase( long prim, long base, long size ) {
 		if ( val.getMajor() > base ) {
 			this->printChar( 'e', 0x00FF00 );
 		} else {	
-			this->printChar( symbols[(char)val.getMajor()], 0xFF0000 );
+			this->printChar( symbols[(char)val.getMajor()], CBLUE );
 		}
 				
 	    prim = prim - (val.getMajor() * denominator );
@@ -135,7 +224,7 @@ void Console::kbase( long prim, long base, long size ) {
 void Console::kbase( long value, long base ) {
 	this->kbase( value, base, 0 );
 }
-
+*/
 template<class T>
 void Console::kprintf( char* string, T value ) {
 	// Iterate over each character.
@@ -179,10 +268,10 @@ void Console::kout( const char* string ) {
 	
 	const char* prefix = "[DONE]\t";
 	while ( *(prefix) != '\0' ) {
-		this->printChar( *(prefix++), 0xFF0000 );
+		this->printChar( *(prefix++), CBLUE );
 	}
 	this->kprint( string );
-	this->printChar('\n', 0xFF0000 );
+	this->printChar('\n', CBLUE );
 	
 }
 

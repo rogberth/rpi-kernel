@@ -17,6 +17,19 @@
 #include "raspberrylib.h"
 #include "mem.h"
 
+//Constantes de color básico para texto
+#define CWHITE 0xFFFFFF
+#define CBLACK 0x0
+#define CBLUE  0xFF0000
+#define CGREEN   0x00FF00
+#define CRED 0x0000FF
+#define CFUCHSIA 0xFF00FF
+#define CCYAN 0xFFFF00
+#define CYELLOW 0x00FFFF
+
+extern "C" void armClearScreen(uint32* addrFBInfo,uint32 colour);
+
+
 class FB_Info {
 public:
 	uint32 screen_width;
@@ -43,13 +56,21 @@ public:
 	void DrawLine( int x1, int y1, int x2, int y2, uint32 color );
 	void DrawCharacter( int x, int y, char c, uint32 color );
 	void ClearCharacter( int x, int y );
-	
 	void Clear( uint32 color );
+	//TFG
+	void ClearFast();
 	
-	
+	uint32 dameBS(){
+		return this->fbInfo->bufferSize;
+	}
+
 	// Basic properties.
 	bool valid;
-	
+
+
+
+
+
 private:
 	bool switched;
 	bool enableDoubleBuffer;

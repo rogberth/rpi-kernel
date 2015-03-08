@@ -16,6 +16,37 @@ typedef		unsigned int		uint32;
 typedef		unsigned short		uint16;
 typedef		unsigned char		byte;
 
+//Clase genérica de cola
+template <class T>
+class Queue{
+public:
+
+	T data;
+	Queue * next;
+
+	Queue(T newdata){
+		data = newdata;
+		next = 0;
+	}
+
+	void Push(Queue* newItem){
+		Queue* end;
+		// Traverse the linked list.
+		while( end->next ) {
+			end = end->next;
+		}
+		// Add to the end.
+		end->next = newItem;
+	}
+
+	bool isEmpty(){
+		if (next == 0){
+			return true;
+		}else return false;
+	}
+
+};
+
 // Linked list structure/class
 class LinkedList {
 public:
@@ -112,8 +143,12 @@ void divide ( int top, int bottom, int* result, int* remainder ) {
 	// Reset the pointer values.
 	*result = 0;
 	*remainder = 0;
-		
+
+	/*
+	 * DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	 */
 	// Iterate until we hit zero.
+	/*
 	int i;
 	for ( i = 0; i < top; i++ ) {
 		if ( (top - bottom) >= 0 ) {
@@ -124,6 +159,15 @@ void divide ( int top, int bottom, int* result, int* remainder ) {
 		}
 		top = top - bottom;
 	}
+	*/
+
+	//Implementación propia
+	int aux = bottom;
+	while(aux <= top){
+		aux+=bottom;
+		*result = *result+1;
+	}
+	*remainder = bottom-(aux-top);
 }
 
 int divide( int top, int bottom ) {
@@ -137,5 +181,29 @@ int modulo( int top, int bottom ) {
 	divide( top, bottom, &result, &remainder );
 	return remainder;
 }
+/*NO FUNCIONA
+void uint32ToString(uint32 n,char * retString){
+	uint16 auxnum;
+	char auxchar;
+	static char * string;
+	bool firsTime = true;
+	while(n != 0){
+		auxnum = modulo(n,10);
+		auxchar = auxnum+'0';
+		*string= auxchar;
+		if(firsTime){
+			*retString = auxchar;
+		}
+		string++;
+	}
+}
+
+
+*/
+
+
+
+
+
 
 #endif

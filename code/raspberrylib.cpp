@@ -12,8 +12,11 @@
 #include "raspberrylib.h"
 #include "common.h"
 
+
 namespace RaspberryLib {
-	
+
+
+
 	volatile uint32 GET32( uint32 addr ) {
 		// Create a pointer to our location in memory.
 		volatile uint32* ptr = (volatile uint32*)( addr );
@@ -45,6 +48,13 @@ namespace RaspberryLib {
 	void SetGPIO( uint32 pin, uint32 state ) {
 		
 		// Setup some initial things.
+		/*
+		 * Explicación de la instrucción por pasos:
+		 * 1- bytes = 0
+		 * 2- operación condicional:
+		 * 	si state == 1 entonce value = 0x28
+		 * 	si no value = 0x1C
+		 */
 		uint32 bytes = 0, value = ( state == 1 ) ? 0x28 : 0x1C;
 		
 		// Calculate the byte shift variables.
@@ -54,6 +64,7 @@ namespace RaspberryLib {
 		}
 		
 		// Add 4 to bytes.
+		// Multiplica por 4 porque queremos direccionar words (4 bytes)
 		bytes *= 4;
 		
 		// Set the proper locations in memory.
@@ -62,6 +73,90 @@ namespace RaspberryLib {
 		
 	}
 	
+	//Crear setGPIOfunction y setGPIOvalue
+    void setGPIOfunction(uint32 pin, byte function){
+    	/*
+    	 * Se comprueba que el pin pasado como argumento esté comprendido entre 0 y 53
+    	 * y que la función del pin esté comprendida entre 0 y 7
+    	 */
+    	if((pin <  54) && (function < 8)){
+    		/*
+			* Calculamos el offset que necesitamos para encontrar el registro
+			* de este pin del GPIO.
+    		*/
+    		uint32 offset = 0;
+    		while(pin > 10){
+    			pin -= 10;
+    			offset++;
+    		}
+    		/*
+    		 * offset valdrá entre 0 y 5. Hay 6 registros de "function select"
+    		 * del GPIO. Por lo que sólo faltaría multiplicar el valor del offset
+    		 * por 4 para conseguir el offset real ya que cada registro está
+    		 * alineado en 4 bytes (un word)
+    		 */
+    		offset *= 4;
+
+    		/*
+    		 * Para introducir el valor del parámetro function en el registro correspondiente
+    		 * pasamos como primer argumento en PUT32 la dirección base del registro GPIO
+    		 * más el nuevo offset recién calculado. El segundo parámetro será function que
+    		 * debido a cómo están organizados estos, hay que desplazar la variable para
+    		 * colocar el valor en los 3 bits que le correspondan al pin designado.
+    		 * Este desplazamiento se calcula multiplicando el valor actual de pin (de 0 a 9)
+    		 * por 3.
+    		 */
+
+    		PUT32(ARM_GPIO_BASE_ADDR+offset,function << (pin * 3));
+
+    	}
+    }
+    void setGPIOvalue(uint32 pin, bool value){
+    	/*
+    	 * Se comprueba que el pin pasado como argumento esté comprendido entre 0 y 53
+    	 */
+    	if(pin <  54){
+    		/*
+    		 * Dependiendo de si el valor que se le quiera dar al pin sea 1 o 0
+    		 * habrá que hacerlo en registros distintos como también si el número
+    		 * de pin es igual o menor a 31 o mayor.
+    		 */
+    		uint32 offset;
+    		if(pin <= 31){
+    			if(value){
+    				offset = 0x1C;
+    			}
+    			else{
+    				offset = 0x28;
+    			}
+    		}else{
+    			if(value){
+					offset = 0x20;
+				}
+				else{
+					offset = 0x2C;
+				}
+    			//Necesario para almacenar el bit de value
+    			pin -= 32;
+    		}
+    		/*
+    		 * Teniendo ya la dirección más el offset correcto
+    		 * sólo falta almacenar un 1 lógico al bit correspondiente
+    		 * del pin. El desplazamiento corresponde al mismo número del pin
+    		 * para los 31 primeros pero para los restantes hay que restarle
+    		 * 32 como se ha hecho antes (con esa condición)
+    		 */
+    		PUT32(ARM_GPIO_BASE_ADDR+offset,1 << pin);
+
+    	}
+    }
+    void setTimer(uint32 time){
+    	//ACTIVAR c1 (c2 y c0 están siendo usados por cp?)
+
+    	PUT32(ARM_TIMER_BASE_ADDR+0x10,CheckCounter()+(time*1000));
+    	PUT32(ARM_TIMER_BASE_ADDR,0x2);
+    }
+
 	uint32 CheckCounter( void ) {
 		return GET32( ARM_COUNTER_ADDR );
 	}

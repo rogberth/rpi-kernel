@@ -14,17 +14,35 @@
 // Include the common header to support my data types.
 #include "common.h"
 
+
 // Define some locations in memory specific to the raspberry pi.
 #define		ARM_BUS_LOCATION		(unsigned int) 0x40000000
 #define		ARM_GPIO_BASE_ADDR		(unsigned int) 0x20200000
 #define		ARM_PERIPHERAL_BASE		(unsigned int) 0x20000000
 #define		ARM_COUNTER_ADDR		(unsigned int) 0x20003004
 #define		ARM_MAIL_BASE			(unsigned int) 0x2000B880
+#define		ARM_TIMER_BASE_ADDR		(unsigned int) 0x20003000
 #define		MAIL_FULL				0x80000000
 #define		MAIL_EMPTY				0x40000000
 #define		ARM_MAIL_READ			0x00
 #define		ARM_MAIL_WRITE			0x20
 #define		ARM_MAIL_STATUS			0x18
+
+//GPIO related
+
+#define GPEDS0	0x20200040
+#define GPEDS1	0x20200044
+
+#define GPSET0  0x2020001C
+#define GPCLR0  0x20200028
+
+#define GPSET1  0x20200020
+#define GPCLR1  0x2020002C
+
+#define GPHEN0  0x20200064
+#define GPFEN0  0x20200058
+
+#define GPREN0  0x2020004C
 
 #define 	KERNEL_FB_LOC			(volatile unsigned int) 0x00002000
 
@@ -86,17 +104,23 @@ namespace RaspberryLib {
 	// Common RPI interaction methods.
 	uint32 CheckCounter( void );
 	void SetGPIO( uint32 pin, uint32 value );
+	void SetGPIOfunction( uint32 pin, byte function);
+	void SetGPIOfunction( uint32 pin, bool value );
 	void WaitQuick( uint32 time );
 	void Wait( uint32 time );
 	void Blink( uint32 count, uint32 time );
 	void PiFault( const char* msg );
-	
+	void setTimer(uint32 time);
 	// Common Advanced RPI methods.
 	uint32 MailboxCheck( char channel );
 	void MailboxWrite( char channel, uint32 value );
 	
+
+
 	// Extreme RPI methods!
 	GPU* AcquireFrameBuffer( uint32 xres, uint32 yres );
+
+
 }
 
 #endif
