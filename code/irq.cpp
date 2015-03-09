@@ -55,8 +55,10 @@ extern "C" void irq_handler( void ) {
 	//irq_console->kprintHexa32(globalLRirq,CBLUE);
 
 	//Limpiar GPIO detect state y desactivar botón
-	PUT32(GPFEN0,0x00000000);
-	PUT32(0x20200040,GET32(0x20200040));
+	//PUT32(GPFEN0,0x00000000);
+	//PUT32(0x20200040,GET32(0x20200040));
+
+	//Desactivar timer
 	PUT32(ARM_TIMER_BASE_ADDR,0x2);
 
 	if(irq_scheduler != 0){
@@ -131,7 +133,7 @@ extern "C" void irq_handler( void ) {
 		asm volatile("ldr sp,[r1]");
 
 		irq_console->clear();
-
+		irq_scheduler->pBlock->state = WAITING;
 		irq_scheduler->Schedule();
 
 	}

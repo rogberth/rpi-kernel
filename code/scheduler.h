@@ -11,14 +11,11 @@
  */
 extern "C" void armLoadContext();
 
-#define SPECIALMEM 0xD000
-
 using namespace RaspberryLib;
 
 /*
  * Stack pointer del scheduler.
  */
-//const uint32 spScheduler = 0x8000;
 
 
 /*
@@ -52,7 +49,6 @@ class Scheduler {
 
 		void LoadContext();
 		void Schedule();
-		void RunNext();
 
 		//Función externa
 
