@@ -19,9 +19,12 @@
 #define		ARM_BUS_LOCATION		(unsigned int) 0x40000000
 #define		ARM_GPIO_BASE_ADDR		(unsigned int) 0x20200000
 #define		ARM_PERIPHERAL_BASE		(unsigned int) 0x20000000
+#define		ARM_TIMER_BASE_ADDR		(unsigned int) 0x20003000
+#define		ARM_TIMER_C1_ADDR		(unsigned int) 0x20003010
+#define		ARM_TIMER_C3_ADDR		(unsigned int) 0x20003018
 #define		ARM_COUNTER_ADDR		(unsigned int) 0x20003004
 #define		ARM_MAIL_BASE			(unsigned int) 0x2000B880
-#define		ARM_TIMER_BASE_ADDR		(unsigned int) 0x20003000
+
 #define		MAIL_FULL				0x80000000
 #define		MAIL_EMPTY				0x40000000
 #define		ARM_MAIL_READ			0x00
@@ -29,6 +32,9 @@
 #define		ARM_MAIL_STATUS			0x18
 
 //GPIO related
+#define GPLEV0 	0x20200034
+#define GPLEV1 	0x20200038
+
 
 #define GPEDS0	0x20200040
 #define GPEDS1	0x20200044
@@ -104,13 +110,18 @@ namespace RaspberryLib {
 	// Common RPI interaction methods.
 	uint32 CheckCounter( void );
 	void SetGPIO( uint32 pin, uint32 value );
-	void SetGPIOfunction( uint32 pin, byte function);
-	void SetGPIOfunction( uint32 pin, bool value );
+	void SetGPIOfunction( uint32 pin, uint32 function);
+	void SetGPIOvalue( uint32 pin, bool value );
+	uint32 ReadGPIOvalue(uint32 pin);
+	void SetLED(uint32 num, bool value);
+	void SetButtons(bool value);
+	void TestBuzzer();
 	void WaitQuick( uint32 time );
 	void Wait( uint32 time );
 	void Blink( uint32 count, uint32 time );
 	void PiFault( const char* msg );
 	void setTimer(uint32 time);
+	void setTimerKernel(uint32 time);
 	// Common Advanced RPI methods.
 	uint32 MailboxCheck( char channel );
 	void MailboxWrite( char channel, uint32 value );

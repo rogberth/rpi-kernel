@@ -73,16 +73,6 @@ void Console::kprint( const char* string ) {
 
 // Clearscreen function.
 void Console::clear( void ) {
-/*
-	//Cambiar a modo SV si está en modo SYSTEM
-	asm volatile("push {r8,r9}");
-	asm volatile("MRS r8,CPSR");
-	asm volatile("LDR r9,=globalProtectCPSR");
-	asm volatile("STR r8,[r9] ");
-	asm volatile( "ORR r8,r8,#0xC");
-	asm volatile( "MSR CPSR,r8");
-	asm volatile("pop {r8,r9}");
-*/
 
 
 
@@ -93,14 +83,6 @@ void Console::clear( void ) {
 	this->canvas->Draw();
 
 
-/*
-	asm volatile("push {r8,r9}");
-	asm volatile("LDR r9,=globalProtectCPSR");
-	asm volatile("LDR r8,[r9]");
-	asm volatile("MSR CPSR,r8");
-	asm volatile("pop {r8,r9}");
-	this->kprintHexa32(globalProtectCPSR,CFUCHSIA);
-	*/
 
 }
 
@@ -133,7 +115,8 @@ void Console::kprint(uint32 number){
 */
 void Console::kprint(uint32 number, uint32 colour ) {
 	int result = 0,remainder = 0, bottom = 10;
-	divide( number, bottom, &result, &remainder );
+	remainder = number%10;
+	result = number/10;
 	//Caso base
 	if(result!=0){
 		this->kprint(result,colour);

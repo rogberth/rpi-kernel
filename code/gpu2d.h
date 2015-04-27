@@ -20,12 +20,14 @@
 //Constantes de color básico para texto
 #define CWHITE 0xFFFFFF
 #define CBLACK 0x0
-#define CBLUE  0xFF0000
+//Not recomended in black backgrounds.
+#define CDARKBLUE  0xFF0000
 #define CGREEN   0x00FF00
 #define CRED 0x0000FF
 #define CFUCHSIA 0xFF00FF
 #define CCYAN 0xFFFF00
 #define CYELLOW 0x00FFFF
+#define CBLUE 0xF0330F
 
 extern "C" void armClearScreen(uint32* addrFBInfo,uint32 colour);
 
@@ -49,7 +51,7 @@ class gpu2dCanvas  {
 public:
 	// Constructor
 	gpu2dCanvas( void );
-	gpu2dCanvas( bool useDoubleBuffer );
+	gpu2dCanvas( bool useDoubleBuffer,uint32 screen_w,uint32 screen_h );
 	
 	// Basic methods.
 	void Draw( void );

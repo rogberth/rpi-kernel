@@ -65,7 +65,6 @@ saved_cpsr:
 ;@ called since the program is going to flow down
 ;@ into this method.
 reset:
-	
 	;@ So now we setup everything to copy the values over.
 	mov r0, #0x8000
 	mov r1, #0x0000
@@ -79,67 +78,58 @@ reset:
 	;@ And then call the bootstrapper init function.
 	;@ NOTE: I delegated these two assembly files because I don't
 	;@ want to marry my kernel to the ivt setup code.
+
 	b init
 	bx lr
 	
 hang:
 	b hang
-	
 
-;@ And here is the actual interrupt handler code.
+
+@IRQ HANDLER
 arm_interrupt_handler_irq:
-
-b irq_handler
-
-@si llega a este punto no ha habido planificación
+	b irq_handler
 
 
-
-
-
-
-;@ And here is the actual interrupt handler code.
+@BASIC HANDLER
 arm_interrupt_handler:
-	
-
-	sub r14, r14, #4
-	stmfd sp, {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14}
+	sub lr, lr, #4
+	stmfd sp!, {r0-r12,lr}
 	bl basic_handler
-
-	@DS
-	/*
-	ldr r0,=0x20200040
-	mov r1,#0x200
-	str r1,[r0]
-	pop {r0,r1}
-	*/
-	
-	@mrs r0,spsr
-	@and r0,r0,#0xFFFFFFF0
-	@orr r0,r0,#0x3
-	@msr cpsr,r0
-
-	/*
-	The caret (A) at the end of the mnemonic forces the processor to transfer the SPSR 
-into the CPSR at the same time, saving us an instruction. This is the recommended 
-way to exit an interrupt handler. 
-	*/
-	ldmfd sp, {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,pc}^
-	bx lr
+	ldmfd sp!, {r0-r12,pc}^
 
 	
 	
-
-;@ And here is the actual interrupt handler code.
+@SVC HANDLER
 arm_interrupt_handler_swi:
+	@este salto primero para no llenar innecesariamente la pila
+	teq r5,#1
+	beq swi_svmode
 	@r0 contiene el número de svc
-	stmfd sp!, {r0-r12,r14}
+	stmfd sp!, {r0-r12,lr}
+
+	teq r5,#0
+	beq swi_case_0
+	teq r5,#2
+	beq swi_case_2
+	teq r5,#3
+	beq swi_case_3
+
+	swi_case_0:
+	bl swi_writer
+	b arm_swi_end
+
+	swi_case_2:
+	bl swi_endTask
+	b arm_swi_end
+
+	swi_case_3:
+	bl swi_addTask
+	b arm_swi_end
+
+
 	
-	@metemos desde aquí r0 en globalSWI
-	ldr r1,=globalSWI
-	str r0,[r1]
-	bl swi_handler
-	
+	arm_swi_end:
 	;@ Restore to the original caller.
 	ldmfd sp!, {r0-r12,pc}^
 
@@ -157,6 +147,14 @@ armLoadContext:
 	msr CPSR, r1
 	ldmfd r0, {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,pc}
 
+.globl armPrepareContext
+armPrepareContext:
+	//Modo USER
+	MOV r0,#0x10
+	MSR CPSR,r0
+	LDR r1,=stackPointer
+	LDR r13,[r1]
+	bx lr
 
 
 .globl armRun

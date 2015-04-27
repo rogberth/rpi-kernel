@@ -1,36 +1,16 @@
-#include "common.h"
-#include "math.h"
-#include "raspberrylib.h"
-#include "gpu2d.h"
-#include "irqprotect.h"
-
-
-Console * processConsole;
-using namespace RaspberryLib;
-using namespace irqprotect;
-
-uint32 globaltest2 = 0;
-uint32 globaltestp = 0;
-
-
+#include "process.h"
 
 
 
 void PrintProcess(){
 
-	uint32 times = 1000;
+	uint32 times = 500;
 	while(times != 0){
-
 		times--;
-
-		asm volatile("MSR CPSR,#0xDF");
-
-		processConsole->kprint("\n[",CGREEN);
-		processConsole->kprint(times,CGREEN);
-		processConsole->kprint("] ",CGREEN);
-		processConsole->kprint("Process 1! ------------------------------- long!",CCYAN);
-
-		asm volatile("MSR CPSR,#0x1F");
+		userPrint("\n[",CGREEN);
+		userPrint(times,CGREEN);
+		userPrint("] ",CGREEN);
+		userPrint("Process 1! ------------------------------- long!",CCYAN);
 	}
 
 }
@@ -38,37 +18,58 @@ void PrintProcess(){
 
 void PrintProcess2(){
 
-	uint32 times = 1000;
+	uint32 times = 500;
 
 	while(times != 0){
 		times--;
-		asm volatile("MSR CPSR,#0xDF");
 
-		processConsole->kprint("\n[",CGREEN);
-		processConsole->kprint(times,CGREEN);
-		processConsole->kprint("] ",CGREEN);
-		processConsole->kprint("Process 2! ------------medium",CRED);
-
-
-		asm volatile("MSR CPSR,#0x1F");
-
+		userPrint("\n[",CGREEN);
+		userPrint(times,CGREEN);
+		userPrint("] ",CGREEN);
+		userPrint("Process 2! ------------medium",CRED);
 	}
+
+
+	userAddTask();
+
 }
 
 void PrintProcess3(){
 
-	uint32 times = 1000;
+
+	uint32 times = 500;
 	while(times != 0){
 
 		times--;
-		asm volatile("MSR CPSR,#0xDF");
-		processConsole->kprint("\n[",CGREEN);
-		processConsole->kprint(times,CGREEN);
-		processConsole->kprint("] ",CGREEN);
-		processConsole->kprint("Process 3! - short",CYELLOW);
-
-		asm volatile("MSR CPSR,#0x1F");
+		userPrint("\n[",CGREEN);
+		userPrint(times,CGREEN);
+		userPrint("] ",CGREEN);
+		userPrint("Process 3! - short",CYELLOW);
 	}
+
+
+}
+
+void PrintProcess4(){
+
+
+	uint32 times = 500;
+	while(times != 0){
+
+		times--;
+		userPrint("\n[",CGREEN);
+		userPrint(times,CGREEN);
+		userPrint("] ",CGREEN);
+		userPrint("Process 4! ------",CFUCHSIA);
+	}
+}
+
+void test1(){
+
+	for(uint32 i = 0; i < 10000000; i++){
+		asm volatile("nop");
+	}
+
 }
 
 

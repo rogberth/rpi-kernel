@@ -8,18 +8,22 @@
 // LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
 // *******************************
 
+
 #include "irq.cpp"
 #include "raspberrylib.cpp"
 #include "gpu2d.cpp"
 #include "console.cpp"
 #include "scheduler.cpp"
-//#include "process.cpp"
+#include "process.cpp"
+#include "svc.cpp"
 // Include the meta data generate at compile time
 // #include "meta.h"
 #include "mem.h"
 #include "math.h"
 #include "meta.h"
 
+
+uint32 globalcount = 0;
 
 using namespace RaspberryLib;
 
@@ -32,33 +36,42 @@ void print_header( Console* console );
 // to see it properly.
 
 extern "C" void kmain( void ) {
+	asm volatile("ldr r1,=globaltest");
+	asm volatile("str lr,[r1]");
+	if(irq_console != 0){
+		irq_console->kprint("\n[ERROR] Salto a direcciOn 0x0. ",CRED);
+		irq_console->kprintHexa32(globaltest,CBLUE);
+		while(true);
+	}
 	//uint32 count = 0;
 	// Create a canvas.
-	gpu2dCanvas canvas(false);
+	gpu2dCanvas canvas(false,(uint32) 1024,(uint32) 768);
 	
 	// Create a console.
 	Console console(&canvas);
-	processConsole = &console;
-	
-	//GPIO
-	//Pin del led en modo salida
-	setGPIOfunction(16,1);
-	//Pin del led APAGADO para encender el LED
-	setGPIOvalue(16,0);
+
 	// Wire up the interrupts.
 	irq_console = &console;
-	use_irq_console = true;
-	
 
+	/*
+	 * Nota: los modelos desde Raspberry Pi A+ y B+ en adelante
+	 * utilizan el pin GPIO 48 mientras que los modelos anteriores
+	 * utilizan el 16.
+	 */
+	//Pin del led en modo salida
+	SetGPIOfunction(48,1);
+	//Pin del led APAGADO para encender el LED
+	SetGPIOvalue(48,0);
+	
 	// Draw to the console.
 	print_header( &console );
-		
 	console.kprint("Waiting: ");
 	int index;
 	for(index = 18; index > 0; index-- ) {
 		console.kprint(".");
 		Wait( 100 );
 	}
+
 	console.kprint("\n[STARTING]\n\n");
 
 	// Initialize memory management first.
@@ -68,20 +81,24 @@ extern "C" void kmain( void ) {
 	// Turn on the green light to signify the end
 	// of our initial kernel code.
 
-	//enable gpio9 input
-	PUT32(GPFEN0,0x00000200);
-
 	irq_enable();
+	irq_enable_kerneltimer();
+	globalverbose = false;
+
+	SetButtons(true);
+
 
 	Scheduler scheduler(&console);
 	irq_scheduler = &scheduler;
+
+	Wait(3000);
 	scheduler.main();
+
+	//setTimer(5000);
 
 
 	while(true){
-
-
-	};
+	}
 
 }
 

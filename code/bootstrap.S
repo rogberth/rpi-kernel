@@ -20,7 +20,7 @@ mov sp, #0x8000
 
 
 ;@ Invoke our main C++ entrypoint.
-	bl kmain
+	b kmain
 
 ;@ Loop forever
 	b hang$

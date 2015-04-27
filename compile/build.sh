@@ -3,7 +3,7 @@
 # Options
 compile_mode=0
 compile_clean=0
-include_output=0
+include_output=1
 
 # Compiler Toolchain
 compiler=arm-none-eabi

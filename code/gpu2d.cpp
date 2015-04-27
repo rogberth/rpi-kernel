@@ -13,13 +13,13 @@
 #include "lamefont.c"
 
 gpu2dCanvas::gpu2dCanvas( ) {
-	gpu2dCanvas( true );
+	gpu2dCanvas( true,1024,768 );
 }
 //Protección contra interrupciones
 
 
 // BASIC CONSTRUCTOR
-gpu2dCanvas::gpu2dCanvas( bool useDoubleBuffer ) {
+gpu2dCanvas::gpu2dCanvas( bool useDoubleBuffer,uint32 screen_w,uint32 screen_h ) {
 	
 	// Determine whether to use the double buffer system.
 	this->enableDoubleBuffer = useDoubleBuffer;
@@ -31,8 +31,8 @@ gpu2dCanvas::gpu2dCanvas( bool useDoubleBuffer ) {
 	this->fbInfo = (FB_Info*)KERNEL_FB_LOC; 
 	
 	// Setup some information about the canvas.
-	this->fbInfo->screen_width = 1024;
-	this->fbInfo->screen_height = 768;
+	this->fbInfo->screen_width = screen_w;//1024;
+	this->fbInfo->screen_height = screen_h;//768;
 	this->fbInfo->virtual_width = this->fbInfo->screen_width;
 	
 	// If we're using double buffer...

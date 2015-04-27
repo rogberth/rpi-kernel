@@ -6,10 +6,9 @@
 #ifndef __KPCB_H_
 #define __KPCB_H_
 
-#include "common.h"
-#include "math.h"
+
 #include "raspberrylib.h"
-#include "gpu2d.h"
+using namespace RaspberryLib;
 
 enum State {CREATED,RUNNING,WAITING,BLOCKED,TERMINATED};
 
@@ -44,9 +43,43 @@ class PCBlock{
 
 			state = CREATED;
 
+			//Pointer to next PCBlock in queue
 			next = 0;
+
+			for(int i=0;i<17;i++){
+				reservedRegisters[i] = 0;
+			}
+
+
 		}
 
+		void Create(uint32 newpid,	ProcessCB newprocess){
+			pid = newpid;
+			process = newprocess;
+			sInitReserved = baseStack;
+			sInit = sInitReserved-(4*17);
+			baseStack = baseStack-stackDistance;
+			sp = sInit;
+
+			lastpc = 0;
+
+			priority = 0;
+
+			state = CREATED;
+
+			//Pointer to next PCBlock in queue
+			next = 0;
+
+			for(int i=0;i<17;i++){
+				reservedRegisters[i] = 0;
+			}
+			pcontext =(uint32) &reservedRegisters[16];
+
+
+		}
+	//17 words reservados para los 16 registros + el CPSR para guardar el contexto del proceso
+	uint32 reservedRegisters[17];
+	uint32 pcontext;
 	//Puntero al siguiente PCBlock para las colas de prioridad
 	PCBlock * next;
 
@@ -121,6 +154,20 @@ public:
 		if (first == 0){
 			return true;
 		}else return false;
+	}
+
+	uint32 Count(){
+		uint32 cont = 0;
+		PCBlock * auxp;
+		if (!isEmpty()){
+			cont++;
+			auxp = first;
+			while(auxp->next != 0){
+				cont++;
+				auxp = auxp->next;
+			}
+		}
+		return cont;
 	}
 };
 

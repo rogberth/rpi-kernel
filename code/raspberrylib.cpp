@@ -46,7 +46,7 @@ namespace RaspberryLib {
 	}
 	
 	void SetGPIO( uint32 pin, uint32 state ) {
-		
+		asm volatile(".ltorg");
 		// Setup some initial things.
 		/*
 		 * Explicación de la instrucción por pasos:
@@ -74,7 +74,7 @@ namespace RaspberryLib {
 	}
 	
 	//Crear setGPIOfunction y setGPIOvalue
-    void setGPIOfunction(uint32 pin, byte function){
+    void SetGPIOfunction(uint32 pin, uint32 function){
     	/*
     	 * Se comprueba que el pin pasado como argumento esté comprendido entre 0 y 53
     	 * y que la función del pin esté comprendida entre 0 y 7
@@ -85,7 +85,7 @@ namespace RaspberryLib {
 			* de este pin del GPIO.
     		*/
     		uint32 offset = 0;
-    		while(pin > 10){
+    		while(pin > 9){
     			pin -= 10;
     			offset++;
     		}
@@ -96,7 +96,6 @@ namespace RaspberryLib {
     		 * alineado en 4 bytes (un word)
     		 */
     		offset *= 4;
-
     		/*
     		 * Para introducir el valor del parámetro function en el registro correspondiente
     		 * pasamos como primer argumento en PUT32 la dirección base del registro GPIO
@@ -104,14 +103,15 @@ namespace RaspberryLib {
     		 * debido a cómo están organizados estos, hay que desplazar la variable para
     		 * colocar el valor en los 3 bits que le correspondan al pin designado.
     		 * Este desplazamiento se calcula multiplicando el valor actual de pin (de 0 a 9)
-    		 * por 3.
+    		 * por 3. A este valor hay que hacerle el OR lógico con el valor anteriormente guardado
+    		 * pues se quiere conservar el resto de estados.
     		 */
-
-    		PUT32(ARM_GPIO_BASE_ADDR+offset,function << (pin * 3));
+    		PUT32(ARM_GPIO_BASE_ADDR+offset,GET32(ARM_GPIO_BASE_ADDR+offset)|(function << (pin * 3)));
 
     	}
+
     }
-    void setGPIOvalue(uint32 pin, bool value){
+    void SetGPIOvalue(uint32 pin, bool value){
     	/*
     	 * Se comprueba que el pin pasado como argumento esté comprendido entre 0 y 53
     	 */
@@ -146,22 +146,108 @@ namespace RaspberryLib {
     		 * para los 31 primeros pero para los restantes hay que restarle
     		 * 32 como se ha hecho antes (con esa condición)
     		 */
-    		PUT32(ARM_GPIO_BASE_ADDR+offset,1 << pin);
+
+    		if(value){
+    			PUT32(ARM_GPIO_BASE_ADDR+offset,(1 << pin));
+    		}else{
+    			PUT32(ARM_GPIO_BASE_ADDR+offset,(1 << pin));
+    		}
 
     	}
     }
-    void setTimer(uint32 time){
-    	//ACTIVAR c1 (c2 y c0 están siendo usados por cp?)
+    uint32 ReadGPIOvalue(uint32 pin){
+    	/*
+    	 * Se comprueba que el pin pasado como argumento esté comprendido entre 0 y 53
+    	 */
+    	if(pin <  54){
+    		/*
+    		 * El registro para leer el valor depende de si el pin es mayor o no de 31
+    		 */
+    		uint32 offset;
+    		if(pin <= 31){
+    			offset = 0x34;
+    		}else{
+    			pin -= 32;
+    			offset = 0x38;
+    		}
+    		/*
+    		 * Se devuelve uno de los dos registros
+    		 */
 
-    	PUT32(ARM_TIMER_BASE_ADDR+0x10,CheckCounter()+(time*1000));
-    	PUT32(ARM_TIMER_BASE_ADDR,0x2);
+    		return	GET32(ARM_GPIO_BASE_ADDR+offset);
+
+    	}
+    	//Aunque se devuelva 0 esto es un error.
+    	return 0;
     }
 
-	uint32 CheckCounter( void ) {
-		return GET32( ARM_COUNTER_ADDR );
+    void SetLED(uint32 num, bool value){
+    	switch(num){
+			case 1:
+				SetGPIOfunction(9,1);
+				SetGPIOvalue(9,value);
+				break;
+			case 2:
+				SetGPIOfunction(10,1);
+				SetGPIOvalue(10,value);
+				break;
+			case 3:
+				SetGPIOfunction(11,1);
+				SetGPIOvalue(11,value);
+				break;
+			case 4:
+				SetGPIOfunction(17,1);
+				SetGPIOvalue(17,value);
+				break;
+			case 5:
+				SetGPIOfunction(22,1);
+				SetGPIOvalue(22,value);
+				break;
+			case 6:
+				SetGPIOfunction(27,1);
+				SetGPIOvalue(27,value);
+				break;
+    	}
+    }
+    void SetButtons(bool value){
+    	if(value){
+    		PUT32(GPFEN0,0x0000000C);
+    	}else{
+    		PUT32(GPFEN0,GET32(GPFEN0) & !(0x0000000C));
+    	}
+    }
+    void TestBuzzer(){
+    	SetGPIOfunction(4,1);
+		SetGPIOvalue(4,true);
+		for(uint32 i = 0;i <= 100000; i++){
+			for(uint32 j = 0; j <= 3; j++){
+				SetGPIOvalue(4,true);
+			}
+			for(uint32 k = 0; k <= 2; k++){
+				SetGPIOvalue(4,false);
+			}
+		}
+
+		SetGPIOvalue(4,false);
+    }
+    void setTimerKernel(uint32 time){
+    	//indicar mediante la variable global que está programado este comparador del kernel
+    	globalkerneltimerset = true;
+    	PUT32(ARM_TIMER_C1_ADDR,CheckCounter()+(time*1000));
+
+    }
+    void setTimer(uint32 time){
+    	//indicar mediante la variable global que está programado este comparador del usuario
+    	globaltimerset = true;
+    	PUT32(ARM_TIMER_C3_ADDR,CheckCounter()+(time*1000));
+    }
+
+    uint32 CheckCounter( void ) {
+    		return GET32( ARM_COUNTER_ADDR );
 	}
 	
 	
+
 	// This method will wait 'time' in 'ticks'
 	// (or cycles) instead of nanoseconds.
 	void WaitQuick( uint32 time ) {
@@ -174,7 +260,7 @@ namespace RaspberryLib {
 		// Read the current time from
 		uint32 ticks = CheckCounter();
 		// Calculate how long to wait.
-		uint32 target = ticks + ( time * 800 );
+		uint32 target = ticks + ( time * 1000 );
 		// Loop until then.
 		while ( CheckCounter() < target ) {
 			/* Do Nothing */
