@@ -9,6 +9,16 @@
 //
 // LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
 // *******************************
+
+// *******************************
+// FILE: 		raspberrylib.c
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		New functionalities added
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 #include "raspberrylib.h"
 #include "common.h"
 

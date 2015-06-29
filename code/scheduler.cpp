@@ -1,3 +1,12 @@
+// *******************************
+// FILE: 		kmain.cpp
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Scheduler functions to run and schedule tasks.
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 #include "scheduler.h"
 
 
@@ -14,10 +23,10 @@ void Scheduler::main(){
 	PCBlock * p4 =(PCBlock *) rootPageTable->allocate(sizeof(PCBlock));
 
 
-	p1->Create(1,PrintProcess);
-	p2->Create(2,PrintProcess2);
-	p3->Create(3,PrintProcess3);
-	p4->Create(4,PrintProcess4);
+	p1->Create(pidcount++,PrintProcess);
+	p2->Create(pidcount++,PrintProcess2);
+	p3->Create(pidcount++,PrintProcess3);
+	p4->Create(pidcount++,PrintProcess4);
 
 
 	taskqueue->Push(p1);
@@ -36,13 +45,6 @@ void Scheduler::main(){
 	totaltime = CheckCounter();
 
 
-
-	//setTimer(1000);
-	asm volatile("nop");
-	asm volatile("nop");
-	asm volatile("nop");
-	asm volatile("nop");
-	asm volatile("nop");
 	Schedule();
 
 }
@@ -65,9 +67,9 @@ void Scheduler::Schedule(){
 
 		if(globalverbose){
 			pconsole->kprint("\nKernelSP: ",CBLUE);
-			asm volatile("ldr r1,=globalaux3");
+			asm volatile("ldr r1,=globalaux");
 			asm volatile("str sp,[r1]");
-			pconsole->kprintHexa32(globalaux3,CGREEN);
+			pconsole->kprintHexa32(globalaux,CGREEN);
 			pconsole->kprint("\n\nSaco el proceso: ",CBLUE);
 			pconsole->kprint(pBlock->pid,CGREEN);
 			pconsole->kprint("\nCon estado: ",CBLUE);
@@ -78,10 +80,7 @@ void Scheduler::Schedule(){
 			pconsole->kprint(pBlock->next->pid,CGREEN);
 			pconsole->kprint("\nPCB guardado en : ",CBLUE);
 			pconsole->kprintHexa32((uint32) &(pBlock->next),CGREEN);
-			conttime = CheckCounter()+2000000;
-			while(conttime >= CheckCounter()){
-
-			}
+			RaspberryLib::Wait( 2000 );
 		}
 
 		if(pBlock->state != TERMINATED){
@@ -100,15 +99,7 @@ void Scheduler::Schedule(){
 			pconsole->clear();
 			if(pBlock->state == CREATED){
 				pBlock->state = RUNNING;
-				//pconsole->kprint("\nDERP",CRED);
-				/*
-				pconsole->kprint("\nGUARDARA CONTEXTO EN: ",CGREEN);
-				pconsole->kprintHexa32(pBlock->pcontext,CBLUE);
-				conttime = CheckCounter()+2000000;
-				while(conttime >= CheckCounter()){
 
-				}
-				*/
 				stackPointer = pBlock->sInitReserved;
 				//Modo USER
 				asm volatile("MOV r0,#0x10");
@@ -118,12 +109,6 @@ void Scheduler::Schedule(){
 
 				setTimerKernel(timeslice);
 				pBlock->process();
-
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
 
 				setTimerKernel(0);
 				asm volatile("mov r5,#2");
@@ -135,11 +120,7 @@ void Scheduler::Schedule(){
 
 				setTimerKernel(timeslice);
 				LoadContext();
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
-				asm volatile("nop");
+
 				setTimerKernel(0);
 				asm volatile("mov r5,#2");
 				asm volatile("SVC #0");
@@ -175,12 +156,8 @@ void Scheduler::Schedule(){
 }
 
 void Scheduler::LoadContext(){
-	uint32 timecont;
 
-
-	//PUT32(GPFEN0,0x00000200);
 	stackPointer =(uint32) pBlock->pcontext;
-	//stackPointer = pBlock->sInitReserved;
 	if(stackPointer != 0){
 		armLoadContext();
 	}else{
@@ -192,17 +169,8 @@ void Scheduler::LoadContext(){
 
 }
 
-void Scheduler::PrepareTask(){
-	pBlock->state = RUNNING;
-	//Carga SP del proceso
-	//stackPointer = pBlock->sInit;
-	stackPointer = pBlock->sInitReserved;
-	armPrepareContext();
-
-}
 
 void Scheduler::AddTask(){
-	uint32 cont = CheckCounter()+4000000;
 	taskqueue->Push(pbnewtask);
 	if(globalverbose){
 		pconsole->kprint("\nNumber of new elements:");
@@ -211,9 +179,7 @@ void Scheduler::AddTask(){
 		pconsole->kprint(pbnewtask->pid);
 		pconsole->kprint("\nNew register zone: ");
 		pconsole->kprintHexa32((uint32)&(pbnewtask->reservedRegisters[0]));
-		while(cont >= CheckCounter()){
-
-		}
+		RaspberryLib::Wait( 4000 );
 	}
 }
 

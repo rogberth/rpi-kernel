@@ -1,3 +1,13 @@
+// *******************************
+// FILE: 		proccess.cpp
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Functions defined here are meant to be used as
+//				programs to be executed by the scheduler.
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 #include "process.h"
 
 

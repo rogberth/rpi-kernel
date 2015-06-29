@@ -8,6 +8,15 @@
 // LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
 // *******************************
 
+// *******************************
+// FILE: 		kmain.cpp
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Here is the PCB class and the TaskQueue class defined
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 
 #include "irq.cpp"
 #include "raspberrylib.cpp"
@@ -23,7 +32,6 @@
 #include "meta.h"
 
 
-uint32 globalcount = 0;
 
 using namespace RaspberryLib;
 

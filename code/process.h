@@ -1,3 +1,12 @@
+// *******************************
+// FILE: 		proccess.h
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Functions declared here are meant to be used as
+//				programs to be executed by the scheduler.
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
 #ifndef __PROCESS_H_
 #define __PROCESS_H_
 

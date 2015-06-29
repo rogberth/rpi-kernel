@@ -20,7 +20,6 @@
 //Constantes de color básico para texto
 #define CWHITE 0xFFFFFF
 #define CBLACK 0x0
-//Not recomended in black backgrounds.
 #define CDARKBLUE  0xFF0000
 #define CGREEN   0x00FF00
 #define CRED 0x0000FF

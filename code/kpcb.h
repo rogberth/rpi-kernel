@@ -1,3 +1,12 @@
+// *******************************
+// FILE: 		kpcb.h
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Here is the PCB class and the TaskQueue class defined
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 /*
  * Bloque de control de proceso
  * Cada instancia de esta clase contendrá información de un proceso asociado
@@ -10,58 +19,33 @@
 #include "raspberrylib.h"
 using namespace RaspberryLib;
 
-enum State {CREATED,RUNNING,WAITING,BLOCKED,TERMINATED};
+enum State {CREATED,RUNNING,WAITING,TERMINATED};
 
 //Puntero a procedimiento void sin argumentos para hacer callback.
 typedef void (*ProcessCB)(void);
 
-const uint32 stackDistance = 0x800;
+//Dirección inicial de las pilas de procesos
+const uint32 baseStack = 0x4000;
+//Distancia entre pila y pila
+const uint32 stackDistance = 0x100;
+//Variable global con la dirección disponible para pila nueva
+uint32 freeStackPos = baseStack;
 
-uint32 baseStack = 0x4000;
 
-/*
- * Distancia entre stacks de procesos:
- * 0x100 significa que hay 256 bytes o
- * 64 words de espacio entre pila y pila.
- */
 
 
 class PCBlock{
 	public:
 
-		PCBlock(uint32 newpid, ProcessCB newprocess){
-			pid = newpid;
-			process = newprocess;
-			sInitReserved = baseStack;
-			sInit = sInitReserved-(4*17);
-			baseStack = baseStack-stackDistance;
-			sp = sInit;
-
-			lastpc = 0;
-
-			priority = 0;
-
-			state = CREATED;
-
-			//Pointer to next PCBlock in queue
-			next = 0;
-
-			for(int i=0;i<17;i++){
-				reservedRegisters[i] = 0;
-			}
-
+		PCBlock(){
 
 		}
 
 		void Create(uint32 newpid,	ProcessCB newprocess){
 			pid = newpid;
 			process = newprocess;
-			sInitReserved = baseStack;
-			sInit = sInitReserved-(4*17);
-			baseStack = baseStack-stackDistance;
-			sp = sInit;
-
-			lastpc = 0;
+			sInitReserved = freeStackPos;
+			freeStackPos = freeStackPos-stackDistance;
 
 			priority = 0;
 
@@ -88,12 +72,6 @@ class PCBlock{
 
 	//Dirección inicial de pila reservada
 	uint32 sInitReserved;
-	//Dirección inicial de la pila (a partir de la posición siguiente a la última reservada)
-	uint32 sInit;
-	//Stack pointer
-	uint32 sp;
-	//Dirección inicial del proceso
-	uint32 lastpc;
 
 
 	//Process ID

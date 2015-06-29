@@ -147,14 +147,6 @@ armLoadContext:
 	msr CPSR, r1
 	ldmfd r0, {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,pc}
 
-.globl armPrepareContext
-armPrepareContext:
-	//Modo USER
-	MOV r0,#0x10
-	MSR CPSR,r0
-	LDR r1,=stackPointer
-	LDR r13,[r1]
-	bx lr
 
 
 .globl armRun

@@ -23,13 +23,13 @@ struct meta {
 
 static meta getBuildInfo() {
 	meta properties;
-	properties.AUTHOR="Roberto Curran";
-	properties.EMAIL="rogberth@gmail.com";
+	properties.AUTHOR="SharpCoder";
+	properties.EMAIL="Josuha@debuggle.com";
 	properties.KERNEL_NAME="0xrpi Kernel";
 	properties.KERNEL_NAME_CODE="Mindflayer";
-	properties.KERNEL_REPO="https://github.com/rogberth/rpi-kernel";
-	properties.BUILD_DATE="2015-06-05  10:51:30 ";
-	properties.VERSION="0.0.2565";
+	properties.KERNEL_REPO="https://github.com/SharpCoder/rpi-kernel";
+	properties.BUILD_DATE="2015-06-25  11:55:43 ";
+	properties.VERSION="0.0.2566";
 	properties.LOGO_TEXT="";
 	properties.LOGO_WIDTH= 30;
 	properties.LOGO_HEIGHT= 50;

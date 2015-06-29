@@ -1,3 +1,12 @@
+// *******************************
+// FILE: 		proccess.cpp
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Added GPIO support and multitasking function
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
 #include "raspberrylib.h"
 #include "console.h"
 #include "scheduler.h"
@@ -54,12 +63,12 @@ using namespace RaspberryLib;
 
 bool irq_enable( void ) {
 	//ENABLE IRQs 2
-	PUT32(IRQ_ENABLE2_ADDR,0x007E0000);
+	PUT32(IRQ_ENABLE2_ADDR,0x001E0000);
 	return true;
 }
 
 bool irq_disable(void){
-	PUT32(IRQ_DISABLE2_ADDR,0x007E0000);
+	PUT32(IRQ_DISABLE2_ADDR,0x001E0000);
 	return true;
 }
 
@@ -85,7 +94,7 @@ bool irq_disable_kerneltimer(){
 extern "C" void irq_handler( void ) {
 	//No se guardan datos de interrupciones previas en la pila, por lo que se reinicia.
 	asm volatile("mov sp, #0x2000");
-	//La dirección de retorno debe ser la interrupción interrumpida, por lo que se le resta 4.
+	//La dirección de retorno debe ser la instrucción interrumpida, por lo que se le resta 4.
 	asm volatile("sub lr, lr, #4");
 	asm volatile("stmfd sp!, {r0-r12,lr}");
 
@@ -95,7 +104,6 @@ extern "C" void irq_handler( void ) {
 	 */
 	//Guardar contexto en AUXADDR abajo
 	asm volatile("push {r0}");
-	//asm volatile("mov r0,#0x1000");
 	asm volatile("mov r0, %[value]" :: [value] "r" (AUXADDR));
 
 	//Guardar
@@ -103,7 +111,7 @@ extern "C" void irq_handler( void ) {
 	asm volatile("pop {r0}");
 	//Se guarda el r0 en la posición más baja, debajo del valor de r1 (0x1000-0x30)
 	asm volatile("mov r1, %[value]" :: [value] "r" (AUXADDR0));
-	//asm volatile("ldr r1,=0xFCC");ESTO ESTABA MAL!!!!
+
 	asm volatile("str r0,[r1]");
 	//Guardado del r14 (lr) del modo IRQ ya que contiene el PC del proceso interrumpido
 	asm volatile("ldr r1,=globalLRirq");

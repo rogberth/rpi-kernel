@@ -65,12 +65,6 @@ void Console::printChar( char c, uint32 color ) {
 
 
 }
-
-// Standard printf function.
-void Console::kprint( const char* string ) {
-	this->kprint( (char*) string );
-}
-
 // Clearscreen function.
 void Console::clear( void ) {
 
@@ -83,8 +77,14 @@ void Console::clear( void ) {
 	this->canvas->Draw();
 
 
-
 }
+
+
+// Standard printf function.
+void Console::kprint( const char* string ) {
+	this->kprint( (char*) string );
+}
+
 
 void Console::kprint( char* string ) {
 	// Iterate over the string.

@@ -81,7 +81,7 @@ Disassembly of section .text:
   ac:	e8fd9fff 	ldm	sp!, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, pc}^
 
 000000b0 <armLoadContext>:
-  b0:	e59f0058 	ldr	r0, [pc, #88]	; 110 <armClearScreenloop+0x18>
+  b0:	e59f0044 	ldr	r0, [pc, #68]	; fc <armClearScreenloop+0x18>
   b4:	e5900000 	ldr	r0, [r0]
   b8:	e2400044 	sub	r0, r0, #68	; 0x44
   bc:	e5901000 	ldr	r1, [r0]
@@ -89,31 +89,24 @@ Disassembly of section .text:
   c4:	e129f001 	msr	CPSR_fc, r1
   c8:	e890ffff 	ldm	r0, {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp, lr, pc}
 
-000000cc <armPrepareContext>:
-  cc:	e3a00010 	mov	r0, #16
-  d0:	e129f000 	msr	CPSR_fc, r0
-  d4:	e59f1034 	ldr	r1, [pc, #52]	; 110 <armClearScreenloop+0x18>
-  d8:	e591d000 	ldr	sp, [r1]
-  dc:	e12fff1e 	bx	lr
+000000cc <armRun>:
+  cc:	e369f010 	msr	SPSR_fc, #16
+  d0:	e92d0001 	stmfd	sp!, {r0}
+  d4:	e8dd8000 	ldm	sp, {pc}^
 
-000000e0 <armRun>:
-  e0:	e369f010 	msr	SPSR_fc, #16
-  e4:	e92d0001 	stmfd	sp!, {r0}
-  e8:	e8dd8000 	ldm	sp, {pc}^
+000000d8 <armClearScreen>:
+  d8:	e3a01000 	mov	r1, #0
+  dc:	e5902024 	ldr	r2, [r0, #36]	; 0x24
+  e0:	e5900020 	ldr	r0, [r0, #32]
 
-000000ec <armClearScreen>:
-  ec:	e3a01000 	mov	r1, #0
-  f0:	e5902024 	ldr	r2, [r0, #36]	; 0x24
-  f4:	e5900020 	ldr	r0, [r0, #32]
-
-000000f8 <armClearScreenloop>:
-  f8:	e5801000 	str	r1, [r0]
-  fc:	e2800004 	add	r0, r0, #4
- 100:	e2422004 	sub	r2, r2, #4
- 104:	e3520000 	cmp	r2, #0
- 108:	1afffffa 	bne	f8 <armClearScreenloop>
- 10c:	e1a0f00e 	mov	pc, lr
- 110:	00000000 	andeq	r0, r0, r0
+000000e4 <armClearScreenloop>:
+  e4:	e5801000 	str	r1, [r0]
+  e8:	e2800004 	add	r0, r0, #4
+  ec:	e2422004 	sub	r2, r2, #4
+  f0:	e3520000 	cmp	r2, #0
+  f4:	1afffffa 	bne	e4 <armClearScreenloop>
+  f8:	e1a0f00e 	mov	pc, lr
+  fc:	00000000 	andeq	r0, r0, r0
 
 Disassembly of section .ARM.attributes:
 

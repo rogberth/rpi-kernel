@@ -134,7 +134,6 @@ void gpu2dCanvas::Clear( uint32 color ) {
 
 }
 
-//NOT FAST
 void gpu2dCanvas::ClearFast(){
 	if ( !this->valid ) return;
 	

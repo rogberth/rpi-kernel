@@ -1,3 +1,13 @@
+// *******************************
+// FILE: 		svc.cpp
+// AUTHOR:		Roberto Curran García
+// DATE:		2015-05-05
+// ABOUT:		Functions to call SVC or to handle them.
+//
+// LICENSE:		Provided "AS IS". USE AT YOUR OWN RISK.
+// *******************************
+
+
 #include "svc.h"
 
 
@@ -85,11 +95,9 @@ void userAddTask(){
 }
 void userPrint(const char * string,uint32 colour){
 
-	//irq_console->kprint(*string,CBLUE);
 	char * caux = (char *) string;
 	uint32 cont = 0;
 
-	//Si recorro el string, no me falla nunca.
 	while((*caux != '\0')||(cont > 1023)){
 		cont++;
 		caux++;
@@ -115,11 +123,9 @@ void userPrint(const char * string){
 
 void userPrint(char * string,uint32 colour){
 
-	//irq_console->kprint(*string,CBLUE);
 	char * caux = (char *) string;
 	uint32 cont = 0;
 
-	//Si recorro el string, no me falla nunca.
 	while((*caux != '\0')||(cont > 1023)){
 		cont++;
 		caux++;
@@ -151,7 +157,6 @@ void userPrint(uint32 num,uint32 colour){
 		asm volatile("SVC #0");
 		ok = true;
 		if(ok == true){
-			//Si no tengo nada después del SVC se reinicia?
 			asm volatile( "nop");
 		}else{
 			irq_console->kprint("\n\n[ERROR] ????",CRED);
@@ -175,7 +180,6 @@ void userPrintHexa32(uint32 num,uint32 colour){
 		asm volatile("SVC #0");
 		ok = true;
 		if(ok == true){
-			//Si no tengo nada después del SVC se reinicia?
 			asm volatile( "nop");
 		}else{
 			irq_console->kprint("\n\n[ERROR] ????",CRED);

@@ -6,16 +6,13 @@
 #include "process.h"
 #include "console.h"
 
+
+using namespace RaspberryLib;
+
 /*
  * Funciones externas
  */
 extern "C" void armLoadContext();
-extern "C" void armPrepareContext();
-using namespace RaspberryLib;
-
-/*
- * Stack pointer del scheduler.
- */
 
 
 /*
@@ -23,44 +20,41 @@ using namespace RaspberryLib;
  */
 uint32 stackPointer = 0;
 uint32 globalSPkernel = 0;
-uint32 globalPCkernel = 0;
-uint32 globalaux3 = 0;
+uint32 globalaux = 0;
 
-uint32 globaltimecont = 0;
-bool globalTaskEnd = false;
 
 class Scheduler {
-
-
 
 	public:
 
 		Scheduler(Console *ptrconsole){
-			timeslice =500;
-
-
-			this->pconsole = ptrconsole;
-			//this->numProcess = 0;
-
+			//Variables importantes sobre los procesos
+			timeslice = 500;
 			pidcount = 1000;
 
+			//Puntero a consola
+			pconsole = ptrconsole;
 
-			this->pBlock = 0;
 
-
+			//Estadísticas
 			totalquantums = 0;
 			totaltime = 0;
 
+			//La cola de procesos de momento está vacía
 			taskqueue = 0;
+
+			//El proceso nuevo de momento no existe
+			pbnewtask = 0;
+
+			//El PCB actual de momento no existe.
+			pBlock = 0;
 
 		}
 
 		void main();
-
 		void LoadContext();
 		void Schedule();
 		void AddTask();
-		void PrepareTask();
 
 		//Función externa
 
@@ -74,20 +68,15 @@ class Scheduler {
 		uint32 totaltime;
 		//Quantum para round robin y similares
 		uint32 timeslice;
-		uint32 conttime;
+
 		PCBlock * pbnewtask;
 		//Puntero a pcb actual
 		PCBlock * pBlock;
 		//Consola asociada
 		Console * pconsole;
-		//Número de procesos
-		//uint32 numProcess;
 
+		//Puntero a la cola de procesos (cola de PCBs)
 		TaskQueue * taskqueue;
-
-
-		//Puntero a la cola de procesos
-		//TaskQueue *taskqueue;
 
 
 
